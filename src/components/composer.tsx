@@ -5,6 +5,7 @@ import Link from "next/link";
 import { createBrowserSupabase } from "@/lib/supabase/browser";
 import { ASPECTS, DEFAULT_MODEL, MAX_COUNT, getModel, modelsFor, type Aspect, type Kind } from "@/lib/models";
 import { CAMERA_MOVES, findMoves } from "@/lib/camera";
+import { PRESETS, activePreset, applyPreset, removePreset } from "@/lib/presets";
 import type { Draft } from "@/components/draft";
 import type { Capabilities } from "@/components/workspace";
 
@@ -21,6 +22,7 @@ export function Composer({ ref, draft, onChange, balance, capabilities, onSubmit
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<{ message: string; code?: string } | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
+  const [styleOpen, setStyleOpen] = useState(false);
   const [uploading, setUploading] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -30,6 +32,7 @@ export function Composer({ ref, draft, onChange, balance, capabilities, onSubmit
   const short = balance !== null && cost > balance;
   const needsImage = draft.kind === "video" && !draft.input;
   const moves = findMoves(draft.prompt);
+  const look = activePreset(draft.prompt, draft.kind);
   const blocked = busy || !draft.prompt.trim() || needsImage || short;
 
   const set = (patch: Partial<Draft>) => {
@@ -218,8 +221,42 @@ export function Composer({ ref, draft, onChange, balance, capabilities, onSubmit
           <div className="flex flex-wrap items-center gap-1.5 px-2 pb-2">
             <div className="relative">
               <button
+                aria-expanded={styleOpen}
+                onClick={() => {
+                  setStyleOpen((o) => !o);
+                  setCameraOpen(false);
+                }}
+                className="rounded-md border border-border px-2 py-1 text-xs text-muted hover:text-text"
+              >
+                {draft.kind === "video" ? "Motion" : "Style"} ＋
+              </button>
+              {styleOpen && (
+                <div className="absolute bottom-full left-0 z-10 mb-2 max-h-80 w-72 overflow-y-auto rounded-card border border-border bg-surface-2 p-1 shadow-xl">
+                  <p className="px-2 py-1 text-xs text-muted">Adds these words to your prompt. Edit them like any other text.</p>
+                  {PRESETS.filter((p) => p.kind === draft.kind).map((p) => (
+                    <button
+                      key={p.id}
+                      aria-pressed={look?.id === p.id}
+                      onClick={() => {
+                        set({ prompt: applyPreset(draft.prompt, p) });
+                        setStyleOpen(false);
+                      }}
+                      className="flex w-full flex-col rounded-md px-2 py-1.5 text-left hover:bg-surface aria-pressed:bg-surface"
+                    >
+                      <span className="text-sm">{p.label}</span>
+                      <span className="text-xs text-muted">{p.fragment}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+            <div className="relative">
+              <button
                 aria-expanded={cameraOpen}
-                onClick={() => setCameraOpen((o) => !o)}
+                onClick={() => {
+                  setCameraOpen((o) => !o);
+                  setStyleOpen(false);
+                }}
                 className="rounded-md border border-border px-2 py-1 text-xs text-muted hover:text-text"
               >
                 Camera ＋
@@ -240,6 +277,14 @@ export function Composer({ ref, draft, onChange, balance, capabilities, onSubmit
                 </div>
               )}
             </div>
+            {look && (
+              <span className="flex items-center gap-1 rounded-md bg-surface-2 px-2 py-1 text-xs">
+                {look.label}
+                <button aria-label={`Remove ${look.label}`} className="text-muted hover:text-text" onClick={() => set({ prompt: removePreset(draft.prompt, draft.kind) })}>
+                  ✕
+                </button>
+              </span>
+            )}
             {moves.map((m) => (
               <span key={m.token} className="flex items-center gap-1 rounded-md bg-accent/15 px-2 py-1 text-xs text-accent">
                 {m.label}

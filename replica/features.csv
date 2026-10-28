@@ -18,7 +18,7 @@ Use a result as reference,feed,must,yes,yes,verified in UI; the free image model
 Animate an image into video keeping prompt and lineage,feed,must,partial,yes,original drops the prompt and switches model silently | verified; lineage bug on repeat takes fixed
 Upload a reference image,composer,must,yes,yes,verified: signed upload straight to Storage, row + object match; paste-to-upload also wired
 Camera moves as # tokens in the prompt,composer,must,yes,yes,original does this in Cinema Studio; ~8 moves | 8 moves; picker + chips + server-side expansion | verified: token kept in UI, expanded for the model
-Style and motion presets as visible prompt fragments,composer,must,partial,no,original hides the prompt when a preset is chosen; ~10 presets
+Style and motion presets as visible prompt fragments,composer,must,partial,yes,original hides the prompt when a preset is chosen; ~10 presets | 10 image looks + 3 motion presets written into the prompt as plain words (one look per kind; picking another replaces it; inserted before camera tokens); verified in browser: Noir replaced 35mm film and the generated image came back black and white
 Library of all generations,library,must,yes,yes,verified in browser: grid, Load more wiring, detail actions hand off to /create (Animate → video mode, start frame + prompt kept)
 Filter library by image or video,library,must,yes,yes,verified in browser (Videos → only the video; kept in the URL)
 Search library by prompt,library,must,yes,yes,prefix full-text search on the GIN index so results narrow while typing; verified ("light" finds "lighthouse"); verified in browser
