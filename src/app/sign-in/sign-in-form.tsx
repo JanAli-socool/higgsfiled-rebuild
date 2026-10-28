@@ -6,7 +6,7 @@ import { createBrowserSupabase } from "@/lib/supabase/browser";
 
 type State = { kind: "idle" } | { kind: "busy" } | { kind: "sent"; email: string } | { kind: "error"; message: string };
 
-export function SignInForm() {
+export function SignInForm({ google }: { google: boolean }) {
   const supabase = createBrowserSupabase();
   const router = useRouter();
   const params = useSearchParams();
@@ -68,9 +68,11 @@ export function SignInForm() {
         <span className="h-px flex-1 bg-border" /> or keep your work with an account <span className="h-px flex-1 bg-border" />
       </div>
 
-      <button onClick={withGoogle} disabled={busy} className="rounded-card border border-border bg-surface px-4 py-3 disabled:opacity-60">
-        Continue with Google
-      </button>
+      {google && (
+        <button onClick={withGoogle} disabled={busy} className="rounded-card border border-border bg-surface px-4 py-3 disabled:opacity-60">
+          Continue with Google
+        </button>
+      )}
 
       <form onSubmit={sendLink} className="flex flex-col gap-2">
         <label htmlFor="email" className="text-sm text-muted">

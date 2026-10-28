@@ -27,3 +27,11 @@ Bugs found and fixed: identical ×N mock takes (now seeded per take); lineage dr
 ## Gotcha
 
 Running `npm run build` while `npm run dev` is running overwrites `.next` and breaks the dev server (and on Windows leaves an orphaned node process holding port 3000). Build in CI or stop dev first.
+
+## Design pass (2026-10-28)
+
+- Own identity: "darkroom" tokens (warm near-black neutrals, one safelight-orange accent), a film-frame logo with a play notch, reduced-motion respected.
+- Landing rebuilt around the core loop using our own outputs: the still, the prompt with `#push-in`, and the real Wan clip it became.
+- Composer floats as a card on wider screens and stays a bottom sheet on phones. First run offers three starter prompts.
+- **Phone width (390 px) checked** for landing, sign-in, create, library, pricing and the detail panel, using a temporary same-origin page of 390 px iframes (Chrome would not resize its window; headless Chrome clamps to ~500 px). Fixed: header wrapping, pricing horizontal scroll (grid children needed `min-w-0`), detail sheet covering the image (now stacked).
+- Sign-in hides "Continue with Google" until the provider is enabled in Supabase (read from `/auth/v1/settings`), so the button can never lead to a provider error.

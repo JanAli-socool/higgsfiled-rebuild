@@ -38,13 +38,15 @@ export function DetailPanel({ generation: g, parent, onClose, onSelect, onRecrea
   const downloadUrl = g.outputUrl ? `${g.outputUrl}&download=reel-${g.id.slice(0, 8)}.${ext}` : null;
 
   return (
-    <div className="fixed inset-0 z-30 flex bg-black/70" role="dialog" aria-modal="true" aria-label="Generation details" onClick={onClose}>
-      <div className="flex min-w-0 flex-1 items-center justify-center p-4" onClick={(e) => e.stopPropagation()}>
-        <Media g={g} controls className="max-h-[85dvh] max-w-full rounded-card object-contain" />
+    <div className="fixed inset-0 z-30 flex bg-black/80 backdrop-blur-sm max-md:flex-col" role="dialog" aria-modal="true" aria-label="Generation details" onClick={onClose}>
+      <div className="flex min-h-0 min-w-0 flex-1 items-center justify-center p-4">
+        <div onClick={(e) => e.stopPropagation()} className="flex max-h-full min-h-0 justify-center">
+          <Media g={g} controls className="max-h-[85dvh] max-w-full rounded-card object-contain max-md:max-h-[36dvh]" />
+        </div>
       </div>
 
       <aside
-        className="flex w-full max-w-sm flex-col gap-4 overflow-y-auto border-l border-border bg-surface p-4 max-md:absolute max-md:inset-x-0 max-md:bottom-0 max-md:max-h-[60dvh] max-md:max-w-none max-md:rounded-t-card max-md:border-l-0"
+        className="flex w-full max-w-sm shrink-0 flex-col gap-4 overflow-y-auto border-l border-border bg-surface p-4 max-md:max-h-[60dvh] max-md:max-w-none max-md:rounded-t-[calc(var(--radius)+6px)] max-md:border-l-0 max-md:border-t"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center justify-between">

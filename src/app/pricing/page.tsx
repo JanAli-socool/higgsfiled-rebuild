@@ -7,6 +7,7 @@ import { PACKS, formatPrice, outcomes } from "@/lib/pricing";
 import { paymentsEnabled } from "@/lib/stripe";
 import { AppHeader } from "@/components/app-header";
 import { BuyButton } from "./buy-button";
+import { Logo } from "@/components/logo";
 
 export const metadata = { title: "Credits · Reel" };
 export const dynamic = "force-dynamic";
@@ -51,9 +52,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
         <AppHeader balance={balance} isGuest={isGuest} />
       ) : (
         <header className="flex items-center border-b border-border px-4 py-2">
-          <Link href="/" className="font-semibold">
-            Reel
-          </Link>
+          <Logo />
           <Link href="/sign-in?next=/pricing" className="ml-auto text-sm text-muted hover:text-text">
             Sign in
           </Link>
@@ -138,7 +137,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
         </ul>
 
         <section className="mt-12 grid gap-10 md:grid-cols-2">
-          <div>
+          <div className="min-w-0">
             <h2 className="font-semibold">What each take costs</h2>
             <table className="mt-3 w-full text-sm">
               <tbody>
@@ -158,7 +157,7 @@ export default async function PricingPage({ searchParams }: { searchParams: Prom
           </div>
 
           {user && (
-            <div>
+            <div className="min-w-0">
               <h2 className="font-semibold">Recent activity</h2>
               {ledger.length === 0 ? (
                 <p className="mt-3 text-sm text-muted">Nothing yet.</p>

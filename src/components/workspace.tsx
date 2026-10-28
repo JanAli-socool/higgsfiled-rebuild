@@ -10,6 +10,12 @@ import { isActive, type Generation } from "@/lib/types";
 
 const POLL_MS = 2000;
 
+const STARTERS = [
+  "a lighthouse on a sea cliff at dusk, waves below, shot on 35mm film, natural grain, soft contrast",
+  "a red fox curled up asleep in a snowy forest, warm golden hour light, long soft shadows",
+  "a tiny ramen shop on a rainy street, neon-lit night, wet streets, cyan and magenta glow",
+];
+
 export type Capabilities = { referenceImages: boolean; realVideo: boolean; models: string[] | null };
 
 export function Workspace({ isGuest }: { isGuest: boolean }) {
@@ -70,7 +76,7 @@ export function Workspace({ isGuest }: { isGuest: boolean }) {
     <div className="flex min-h-dvh flex-col">
       <AppHeader balance={balance} isGuest={isGuest} />
 
-      <main className="flex-1 px-4 pb-72 pt-4">
+      <main className="mx-auto w-full max-w-7xl flex-1 px-3 pb-80 pt-4 sm:px-4">
         {loadError && (
           <p role="alert" className="mb-4 rounded-card border border-danger/40 bg-danger/10 px-4 py-3 text-sm">
             Couldn&apos;t load your work. <button className="underline" onClick={refresh}>Try again</button>
@@ -80,12 +86,25 @@ export function Workspace({ isGuest }: { isGuest: boolean }) {
         {items === null && !loadError && <FeedSkeleton />}
 
         {items?.length === 0 && (
-          <div className="mx-auto mt-16 max-w-md text-center">
-            <h1 className="text-xl font-semibold">Your first take starts below</h1>
+          <div className="mx-auto mt-10 max-w-lg text-center sm:mt-16">
+            <h1 className="text-2xl font-semibold tracking-tight">Your first take starts below</h1>
             <p className="mt-2 text-muted">
-              Describe a scene and press Generate. Fast drafts cost 1 credit, so try a few. When you like a frame, hit
-              Animate to turn it into a shot.
+              Describe a scene and press Generate. Fast drafts cost 1 credit, so try a few. When you like a frame, open it
+              and press Animate to turn it into a shot.
             </p>
+            <p className="mt-6 text-xs text-muted">Or start from one of these</p>
+            <ul className="mt-2 flex flex-col gap-2">
+              {STARTERS.map((s) => (
+                <li key={s}>
+                  <button
+                    onClick={() => load({ ...emptyDraft, prompt: s })}
+                    className="w-full rounded-card border border-border bg-surface px-4 py-3 text-left text-sm transition-colors hover:border-muted"
+                  >
+                    {s}
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
         )}
 

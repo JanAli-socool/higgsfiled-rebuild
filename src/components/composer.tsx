@@ -120,9 +120,9 @@ export function Composer({ ref, draft, onChange, balance, capabilities, onSubmit
   return (
     <section
       aria-label="Composer"
-      className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-bg/95 px-4 pb-4 pt-3 backdrop-blur"
+      className="fixed inset-x-0 bottom-0 z-10 border-t border-border bg-bg/95 px-3 pb-3 pt-2.5 backdrop-blur sm:inset-x-4 sm:bottom-4 sm:mx-auto sm:max-w-3xl sm:rounded-[calc(var(--radius)+6px)] sm:border sm:bg-surface/95 sm:px-4 sm:pb-4 sm:pt-3 sm:shadow-float"
     >
-      <div className="mx-auto flex max-w-3xl flex-col gap-2">
+      <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
           <div role="radiogroup" aria-label="What to make" className="flex rounded-lg border border-border bg-surface p-0.5 text-sm">
             {(["image", "video"] as Kind[]).map((k) => (
@@ -200,6 +200,7 @@ export function Composer({ ref, draft, onChange, balance, capabilities, onSubmit
             id="prompt"
             ref={ref}
             rows={2}
+            enterKeyHint="go"
             value={draft.prompt}
             maxLength={2000}
             onChange={(e) => set({ prompt: e.target.value })}
