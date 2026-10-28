@@ -215,6 +215,7 @@ export function capabilities() {
   return {
     referenceImages: image.supportsReference,
     realVideo: video.name !== "mock",
+    videoNote: video.qualityNote ?? null,
     models: [...ids(image, "image"), ...ids(video, "video")],
   };
 }

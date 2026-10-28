@@ -15,8 +15,10 @@ const RATIO: Record<Aspect, [number, number]> = {
 };
 
 // "Fast" and "High quality" differ in resolution and prompt enhancement, so the price gap is real.
+// Fast drafts are 832 on the long side: the video model renders at 832, so Animate never has to
+// upscale a draft (at 512 the start frame was upscaled and the clip came out soft and blocky).
 function size(modelId: string, aspect: Aspect) {
-  const long = modelId === "img-quality" ? 1024 : 512;
+  const long = modelId === "img-quality" ? 1024 : 832;
   const [w, h] = RATIO[aspect];
   const scale = long / Math.max(w, h);
   return { width: Math.round((w * scale) / 8) * 8, height: Math.round((h * scale) / 8) * 8 };
@@ -53,9 +55,15 @@ export const pollinationsProvider: ModelProvider = {
 
   async result(job) {
     const seed = job.requestId.split("::")[1];
+    const get = () => fetch(url(job.prompt, job.modelId, job.aspect, seed), { signal: AbortSignal.timeout(90_000) });
     let res: Response;
     try {
-      res = await fetch(url(job.prompt, job.modelId, job.aspect, seed), { signal: AbortSignal.timeout(90_000) });
+      res = await get();
+      // 503 means the shared free pool is momentarily full; it asks for a retry after about 10 s.
+      if (res.status === 503) {
+        await new Promise((r) => setTimeout(r, 12_000));
+        res = await get();
+      }
     } catch {
       throw new ProviderJobFailed("The image service didn't answer in time");
     }
@@ -64,7 +72,7 @@ export const pollinationsProvider: ModelProvider = {
       // The keyless tier allows one image per 45 s per IP and answers 402 FREE_LIMIT past that.
       const limited = res.status === 402 || res.status === 429;
       throw new ProviderJobFailed(
-        limited ? "The free image service allows one image every 45 seconds. Try again shortly." : `The image service failed (${res.status})`,
+        limited ? "The free image service allows one image every 45 seconds. Try again shortly." : res.status === 503 ? "The free image service is busy right now. Try again in a minute." : `The image service failed (${res.status})`,
       );
     }
     const { width, height } = size(job.modelId, job.aspect);

@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { createBrowserSupabase } from "@/lib/supabase/browser";
+import { uploadImage } from "@/components/upload";
 import { ASPECTS, DEFAULT_MODEL, MAX_COUNT, getModel, modelsFor, type Aspect, type Kind } from "@/lib/models";
 import { CAMERA_MOVES, findMoves } from "@/lib/camera";
 import { PRESETS, activePreset, applyPreset, removePreset } from "@/lib/presets";
@@ -55,27 +55,13 @@ export function Composer({ ref, draft, onChange, balance, capabilities, onSubmit
   }
 
   async function upload(file: File) {
-    if (!["image/png", "image/jpeg", "image/webp"].includes(file.type)) {
-      return setError({ message: "Use a PNG, JPEG or WebP image." });
-    }
-    if (file.size > 10 * 1024 * 1024) return setError({ message: "Images can be up to 10 MB." });
     setUploading(true);
     setError(null);
     try {
-      const res = await fetch("/api/uploads", {
-        method: "POST",
-        headers: { "content-type": "application/json" },
-        body: JSON.stringify({ mime: file.type, bytes: file.size }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) return setError({ message: data.error ?? "Upload failed. Try again." });
-      const { error } = await createBrowserSupabase()
-        .storage.from("uploads")
-        .uploadToSignedUrl(data.object, data.token, file, { contentType: file.type });
-      if (error) return setError({ message: "Upload failed. Try again." });
-      onChange({ ...draft, input: { path: data.path, url: URL.createObjectURL(file) }, parentId: null });
-    } catch {
-      setError({ message: "Upload failed. Check your connection and try again." });
+      const path = await uploadImage(file);
+      onChange({ ...draft, input: { path, url: URL.createObjectURL(file) }, parentId: null });
+    } catch (e) {
+      setError({ message: e instanceof Error ? e.message : "Upload failed. Check your connection and try again." });
     } finally {
       setUploading(false);
     }
@@ -180,6 +166,9 @@ export function Composer({ ref, draft, onChange, balance, capabilities, onSubmit
           <p className="text-sm text-muted">
             The free image model only reads your prompt, so describe what to keep from the reference.
           </p>
+        )}
+        {draft.kind === "video" && capabilities.realVideo && capabilities.videoNote && !needsImage && (
+          <p className="text-xs text-muted">{capabilities.videoNote}</p>
         )}
         {draft.kind === "video" && !capabilities.realVideo && (
           <p className="text-sm text-muted">Video is in preview mode: you&apos;ll get a placeholder clip while real video is switched off.</p>

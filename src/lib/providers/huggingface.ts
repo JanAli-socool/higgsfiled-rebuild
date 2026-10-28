@@ -16,6 +16,7 @@ export const huggingfaceProvider: ModelProvider = {
   supportsReference: true,
   supportedModels: ["vid-5s"],
   typicalSeconds: () => 75,
+  qualityNote: "Free video model: about 480p at 16 fps, 5 s per clip. Start from a sharp image, and use Extend on a finished clip for longer shots.",
 
   async submit(input) {
     if (input.kind !== "video") throw new Error("This provider only animates images");

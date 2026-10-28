@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AppHeader } from "@/components/app-header";
 import { DetailPanel } from "@/components/detail-panel";
+import { extendDraft, shotOf } from "@/components/extend";
 import { Media, aspectClass } from "@/components/media";
 import { animateDraft, emptyDraft, recreateDraft, referenceDraft, stashDraft, type Draft } from "@/components/draft";
 import type { Kind } from "@/lib/models";
@@ -256,6 +257,8 @@ export function Library({ isGuest, initialKind, initialQuery }: { isGuest: boole
           onRecreate={() => continueIn(recreateDraft(selected))}
           onReference={() => continueIn(referenceDraft(selected, emptyDraft))}
           onAnimate={() => continueIn(animateDraft(selected))}
+          onExtend={async () => continueIn(await extendDraft(selected))}
+          shot={shotOf(selected, items ?? [])}
           onDelete={() => trash(selected)}
         />
       )}

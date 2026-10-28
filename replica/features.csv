@@ -3,7 +3,7 @@ Sign in with magic link or Google,auth,must,yes,partial,original also has Apple/
 Land in the workspace after sign-in (not marketing),auth,must,no,yes,fix: original drops new users on the landing page | verified via email link
 Starter credits on signup,credits,must,yes,yes,original gives 50 for work email only | 100 for accounts, 30 for guests (DB trigger) | verified: trigger grants 100 + ledger row
 One composer for image and video,composer,must,no,yes,fix: original has four different generate forms | verified
-3-4 curated models labelled best-for,composer,must,partial,partial,real images via Pollinations (rate-limited) and Cloudflare (pending creds); real video via HF Wan 2.2 Space verified in-app (5 s clip, ~2.5 min incl. queue; ~2 clips/day on a free token). 10 s video hidden when the provider caps at 5 s
+3-4 curated models labelled best-for,composer,must,partial,partial,real images via Pollinations (rate-limited) and Cloudflare (pending creds); real video via HF Wan 2.2 Space verified in-app (5 s clip, ~2.5 min incl. queue; ~2 clips/day on a free token). 10 s video hidden when the provider caps at 5 s | fast drafts now 832 long side so Animate never upscales; Extend chains 5 s clips into longer shots
 Aspect ratio and output count,composer,must,yes,yes, | verified x2
 Live cost next to remaining balance on Generate,composer,must,partial,yes,original shows cost but balance only on profile | verified (100 -> 98 left)
 Insufficient credits shown before Generate with inline top-up,credits,must,no,yes,fix: original paywalls after the prompt is written | verified as guest (needs 40 / has 29; Generate disabled); top-up links to the /pricing stub

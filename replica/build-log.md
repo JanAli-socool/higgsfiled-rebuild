@@ -35,3 +35,10 @@ Running `npm run build` while `npm run dev` is running overwrites `.next` and br
 - Composer floats as a card on wider screens and stays a bottom sheet on phones. First run offers three starter prompts.
 - **Phone width (390 px) checked** for landing, sign-in, create, library, pricing and the detail panel, using a temporary same-origin page of 390 px iframes (Chrome would not resize its window; headless Chrome clamps to ~500 px). Fixed: header wrapping, pricing horizontal scroll (grid children needed `min-w-0`), detail sheet covering the image (now stacked).
 - Sign-in hides "Continue with Google" until the provider is enabled in Supabase (read from `/auth/v1/settings`), so the button can never lead to a provider error.
+
+## Video quality, longer shots, generating backdrop (2026-10-28)
+
+- **Pixelation, root cause** (measured, not guessed): the free Wan 2.2 Space has no resolution input and always renders ~480p at 16 fps (480×832 for 9:16, 624×832 for 3:4, ~1 Mbps). Our own contribution was fast drafts at 384×512: Animate fed them in and the model upscaled them. Fix: fast drafts are now 832 on the long side (verified in-app: 624×832). The composer states the video model's limits before you pay. Real HD needs a paid model (one env change in the provider adapter).
+- **Longer shots: Extend.** Free video stops at 5 s, so a shot is built from linked clips: Extend grabs the exact last frame of a clip in the browser (canvas; Storage sends `Access-Control-Allow-Origin: *`), uploads it, and opens the composer with it as the start frame and `parent_id` set. "Play full shot" plays the chain back to back. Verified: 624×832 PNG last frame, real continuation clip in 115 s, 3-clip / 15 s shot plays in order and loops. Limit: about 2 free clips a day, so 30 s (6 clips) or 60 s (12 clips) takes days on the free token.
+- **Generating backdrop**: in-progress cards show the start frame (or reference) dimmed with a slow push-in, or a shimmer for prompt-only images, instead of a black box.
+- **Pollinations 503** ("Classic API is at its limit right now") is retried once after 12 s; the remaining failure reads "busy, try again in a minute".

@@ -5,6 +5,7 @@ import { AppHeader } from "@/components/app-header";
 import { Composer } from "@/components/composer";
 import { FeedCard } from "@/components/feed-card";
 import { DetailPanel } from "@/components/detail-panel";
+import { extendDraft, shotOf } from "@/components/extend";
 import { animateDraft, emptyDraft, recreateDraft, referenceDraft, takeStashedDraft, type Draft } from "@/components/draft";
 import { isActive, type Generation } from "@/lib/types";
 
@@ -16,12 +17,12 @@ const STARTERS = [
   "a tiny ramen shop on a rainy street, neon-lit night, wet streets, cyan and magenta glow",
 ];
 
-export type Capabilities = { referenceImages: boolean; realVideo: boolean; models: string[] | null };
+export type Capabilities = { referenceImages: boolean; realVideo: boolean; videoNote: string | null; models: string[] | null };
 
 export function Workspace({ isGuest }: { isGuest: boolean }) {
   const [items, setItems] = useState<Generation[] | null>(null);
   const [balance, setBalance] = useState<number | null>(null);
-  const [caps, setCaps] = useState<Capabilities>({ referenceImages: true, realVideo: true, models: null });
+  const [caps, setCaps] = useState<Capabilities>({ referenceImages: true, realVideo: true, videoNote: null, models: null });
   const [loadError, setLoadError] = useState(false);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -141,6 +142,8 @@ export function Workspace({ isGuest }: { isGuest: boolean }) {
           onRecreate={() => load(recreateDraft(selected))}
           onReference={() => load(referenceDraft(selected, draft))}
           onAnimate={() => load(animateDraft(selected))}
+          onExtend={async () => load(await extendDraft(selected))}
+          shot={shotOf(selected, items ?? [])}
         />
       )}
     </div>

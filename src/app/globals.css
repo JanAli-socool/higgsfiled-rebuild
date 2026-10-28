@@ -60,3 +60,21 @@ body {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Generating states: a slow push-in on the source frame, or a soft sweep when there is none. */
+@keyframes reel-drift {
+  from { transform: scale(1.04); }
+  to { transform: scale(1.16) translateY(-2%); }
+}
+.reel-drift {
+  animation: reel-drift 9s ease-in-out infinite alternate;
+}
+@keyframes reel-shimmer {
+  from { background-position: 150% 0; }
+  to { background-position: -50% 0; }
+}
+.reel-shimmer {
+  background: linear-gradient(110deg, var(--surface) 35%, var(--surface-2) 50%, var(--accent-soft) 55%, var(--surface) 70%);
+  background-size: 250% 100%;
+  animation: reel-shimmer 2.2s linear infinite;
+}

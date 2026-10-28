@@ -33,6 +33,7 @@ export interface ModelProvider {
   supportsReference: boolean;
   supportedModels?: string[]; // model ids this provider can serve; all of its kind if omitted
   typicalSeconds?(modelId: string): number | undefined; // overrides the model's default
+  qualityNote?: string; // shown in the composer so output limits are known before paying
   submit(input: SubmitInput): Promise<string>; // returns requestId
   status(job: JobRef): Promise<ProviderStatus>;
   result(job: JobRef): Promise<ProviderOutput>; // throws if the job failed

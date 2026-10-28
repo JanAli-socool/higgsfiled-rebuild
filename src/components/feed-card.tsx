@@ -19,11 +19,23 @@ export function FeedCard({ generation: g, onOpen, onCancel }: Props) {
   }
 
   if (g.status === "queued" || g.status === "running") {
+    // A backdrop instead of an empty box: the frame being animated (or the reference), slowly drifting;
+    // a soft shimmer when there's no image yet.
     return (
       <div className={`${shape} flex flex-col justify-end p-3`}>
-        <Progress g={g} />
-        <p className="mt-2 line-clamp-2 text-xs text-muted">{g.prompt}</p>
-        <button onClick={onCancel} className="absolute right-2 top-2 rounded-md bg-black/40 px-2 py-1 text-xs hover:bg-black/60">
+        {g.inputImageUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={g.inputImageUrl} alt="" aria-hidden="true" className="reel-drift absolute inset-0 h-full w-full object-cover opacity-60 blur-[1.5px]" />
+        ) : (
+          <div className="reel-shimmer absolute inset-0" aria-hidden="true" />
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" aria-hidden="true" />
+        <div className="relative">
+          <p className="mb-2 text-xs font-medium">{g.kind === "video" ? "Animating" : "Generating"}</p>
+          <Progress g={g} />
+          <p className="mt-2 line-clamp-2 text-xs text-muted">{g.prompt}</p>
+        </div>
+        <button onClick={onCancel} className="absolute right-2 top-2 rounded-md bg-black/50 px-2 py-1 text-xs backdrop-blur hover:bg-black/70">
           Cancel
         </button>
       </div>
