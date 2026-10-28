@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
       kind: kind === "image" || kind === "video" ? kind : undefined,
       q: p.get("q") ?? undefined,
       before: p.get("before") ?? undefined,
+      finished: p.get("finished") === "1",
     }),
     balanceOf(user.id),
   ]);

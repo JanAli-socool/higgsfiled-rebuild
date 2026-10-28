@@ -51,3 +51,23 @@ export const animateDraft = (g: Generation): Draft => ({
   input: { path: g.outputPath!, url: g.outputUrl },
   parentId: g.id,
 });
+
+// Hands a draft from another page (the library) to /create. Session storage can be missing
+// or blocked, in which case the action simply opens an empty composer.
+const STASH = "reel:draft";
+
+export function stashDraft(d: Draft) {
+  try {
+    sessionStorage.setItem(STASH, JSON.stringify(d));
+  } catch {}
+}
+
+export function takeStashedDraft(): Draft | null {
+  try {
+    const raw = sessionStorage.getItem(STASH);
+    sessionStorage.removeItem(STASH);
+    return raw ? (JSON.parse(raw) as Draft) : null;
+  } catch {
+    return null;
+  }
+}

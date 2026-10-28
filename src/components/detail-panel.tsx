@@ -13,9 +13,10 @@ type Props = {
   onRecreate: () => void;
   onReference: () => void;
   onAnimate: () => void;
+  onDelete?: () => void;
 };
 
-export function DetailPanel({ generation: g, parent, onClose, onSelect, onRecreate, onReference, onAnimate }: Props) {
+export function DetailPanel({ generation: g, parent, onClose, onSelect, onRecreate, onReference, onAnimate, onDelete }: Props) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const [copied, setCopied] = useState(false);
   const model = getModel(g.modelId);
@@ -122,6 +123,11 @@ export function DetailPanel({ generation: g, parent, onClose, onSelect, onRecrea
             <a href={downloadUrl} className="rounded-card border border-border px-3 py-2 text-center text-sm hover:bg-surface-2">
               Download
             </a>
+          )}
+          {onDelete && (
+            <button onClick={onDelete} className="rounded-card px-3 py-2 text-sm text-muted hover:text-danger">
+              Move to trash
+            </button>
           )}
         </div>
       </aside>

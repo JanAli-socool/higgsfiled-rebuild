@@ -19,19 +19,19 @@ Animate an image into video keeping prompt and lineage,feed,must,partial,yes,ori
 Upload a reference image,composer,must,yes,yes,verified: signed upload straight to Storage, row + object match; paste-to-upload also wired
 Camera moves as # tokens in the prompt,composer,must,yes,yes,original does this in Cinema Studio; ~8 moves | 8 moves; picker + chips + server-side expansion | verified: token kept in UI, expanded for the model
 Style and motion presets as visible prompt fragments,composer,must,partial,no,original hides the prompt when a preset is chosen; ~10 presets
-Library of all generations,library,must,yes,no,
-Filter library by image or video,library,must,yes,no,
-Search library by prompt,library,must,yes,no,
-Real empty states,library,must,no,partial,fix: original video History shows onboarding when empty | built; not yet verified in browser; feed only so far
+Library of all generations,library,must,yes,partial,built: grid of finished takes + Load more + detail actions hand off to /create; DB queries verified; browser check pending (dev server down)
+Filter library by image or video,library,must,yes,partial,built (All / Images / Videos; kept in the URL); query verified
+Search library by prompt,library,must,yes,partial,prefix full-text search on the GIN index so results narrow while typing; verified ("light" finds "lighthouse")
+Real empty states,library,must,no,partial,fix: original video History shows onboarding when empty | built; not yet verified in browser; feed only so far; library: first-run and no-match states built
 Credit ledger,credits,must,yes,yes,inferred | verified: ledger sum == balance (78)
-Pricing page that explains credits as outcomes,pricing,must,partial,no,
-Buy a credit pack with Stripe test mode,pricing,must,yes,no,packs only; subscriptions cut
+Pricing page that explains credits as outcomes,pricing,must,partial,partial,built: packs as "about N drafts / N videos" from live model prices + per-model cost table + recent ledger activity; browser check pending
+Buy a credit pack with Stripe test mode,pricing,must,yes,partial,packs only; subscriptions cut; Checkout + verify-on-return + signed webhook built; needs STRIPE_SECRET_KEY to test. Guests must sign in to buy
 Download a result,feed,must,yes,yes,verified: signed URL served as attachment
 Side-by-side compare of takes,feed,should,no,no,
 Version tree from parent generation,feed,should,no,no,
 Start and end frame for video,composer,should,yes,no,
 Public share link for one generation,sharing,should,yes,no,
-Delete to trash,library,should,yes,no,
+Delete to trash,library,should,yes,partial,soft delete with Undo toast; DB round trip verified
 Favourite a result,library,could,yes,no,
 Subscriptions with monthly credits,pricing,skip,yes,skip,proration and renewals cost hours; packs prove the money loop
 ~25 more models,composer,skip,yes,skip,model choice is the most confusing part of the original

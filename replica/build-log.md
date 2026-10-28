@@ -7,7 +7,8 @@
 | S04/S09 /create (composer + feed + detail) | 2026-10-27 | done (M1 + M2) | style presets (M3); mobile width not checked (window could not be resized). Upload, paste, Recreate, Use as reference, Download, out-of-credits state and Ctrl+Enter verified | — |
 | API generations / cancel / fal webhook | 2026-10-27 | done on mock | real image provider pending (see below) | see providers |
 | providers | 2026-10-27 | partial | real images: Cloudflare credentials pending (Pollinations used for single test images); real video: verified in-app with HF_TOKEN (upload start image → Wan 2.2 Space → 5 s portrait MP4 in ~2.5 min incl. queue, push-in visible, stored + playable) | fal has no balance. Pollinations: 1 image / 45 s per IP. A 5 s Wan clip reserves **150 s** of ZeroGPU quota, so a free account gets ~2 per day. See `reports/Free video generation options.md` |
-| S19 /library, S21 /pricing | 2026-10-27 | stub | milestone 4 | — |
+| S19 /library | 2026-10-28 | built, browser check pending | verify at 390px; favourites (could) | — |
+| S21 /pricing + Stripe | 2026-10-28 | built, untested end to end | needs `STRIPE_SECRET_KEY` (test mode). No webhook secret needed locally: `/pricing/return` re-reads the session from Stripe and grants once (ledger unique index on session id) | Stripe called via REST (no SDK). Guests are blocked from buying: anonymous credits are lost with the browser session |
 
 ## Verified in the browser (2026-10-27)
 

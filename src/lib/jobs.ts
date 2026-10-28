@@ -252,7 +252,10 @@ async function fail(id: string, message: string) {
 
 // ------------------------------------------------------------------ read
 
-export async function listGenerations(userId: string, opts: { kind?: Kind; q?: string; before?: string; limit?: number }) {
+export async function listGenerations(
+  userId: string,
+  opts: { kind?: Kind; q?: string; before?: string; limit?: number; finished?: boolean },
+) {
   const db = createAdminClient();
   let query = db
     .from("generations")
@@ -262,13 +265,35 @@ export async function listGenerations(userId: string, opts: { kind?: Kind; q?: s
     .order("created_at", { ascending: false })
     .limit(opts.limit ?? 40);
   if (opts.kind) query = query.eq("kind", opts.kind);
+  if (opts.finished) query = query.eq("status", "succeeded");
   if (opts.before) query = query.lt("created_at", opts.before);
-  if (opts.q?.trim()) query = query.textSearch("search", opts.q.trim(), { type: "websearch", config: "english" });
+  const tsquery = prefixQuery(opts.q);
+  if (tsquery) query = query.textSearch("search", tsquery, { config: "english" });
 
   const { data, error } = await query.returns<Row[]>();
   if (error) throw error;
   const rows = await Promise.all(data.map((r) => (ACTIVE.includes(r.status) ? syncGeneration(r) : r)));
   return Promise.all(rows.map(toDto));
+}
+
+// Every word must match, each as a prefix, so results narrow while you type ("light" finds "lighthouse").
+function prefixQuery(q?: string) {
+  const words = (q ?? "").toLowerCase().match(/[\p{L}\p{N}]+/gu)?.slice(0, 8) ?? [];
+  return words.map((w) => `${w}:*`).join(" & ");
+}
+
+// Soft delete: the row and its files stay, so a mistaken delete can be undone.
+export async function trashGeneration(userId: string, id: string, restore = false) {
+  const db = createAdminClient();
+  let query = db
+    .from("generations")
+    .update({ deleted_at: restore ? null : new Date().toISOString() })
+    .eq("id", id)
+    .eq("user_id", userId);
+  // Active jobs are cancelled, not deleted, so their refund logic stays in one place.
+  if (!restore) query = query.not("status", "in", `(${ACTIVE.join(",")})`);
+  const { data } = await query.select("id");
+  if (!data?.length) throw new JobError(restore ? "Nothing to restore" : "Cancel the job before deleting it", 409, "not_deletable");
 }
 
 export async function getGeneration(userId: string, id: string) {

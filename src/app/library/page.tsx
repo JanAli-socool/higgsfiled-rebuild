@@ -1,16 +1,18 @@
-import Link from "next/link";
+import { redirect } from "next/navigation";
+import { getUser } from "@/lib/supabase/server";
+import { Library } from "@/components/library";
 
 export const metadata = { title: "Library · Reel" };
 
-// Milestone 4: grid of everything, image/video filter, prompt search.
-export default function LibraryPage() {
+export default async function LibraryPage({ searchParams }: { searchParams: Promise<{ kind?: string; q?: string }> }) {
+  const user = await getUser();
+  if (!user) redirect("/sign-in?next=/library");
+  const { kind, q } = await searchParams;
   return (
-    <main className="mx-auto max-w-2xl px-4 py-16">
-      <h1 className="text-2xl font-semibold">Library</h1>
-      <p className="mt-2 text-muted">Search and filters are on the way. For now, everything you make is in your feed.</p>
-      <Link href="/create" className="mt-4 inline-block text-accent underline">
-        Back to Create
-      </Link>
-    </main>
+    <Library
+      isGuest={user.is_anonymous ?? false}
+      initialKind={kind === "image" || kind === "video" ? kind : "all"}
+      initialQuery={q?.slice(0, 200) ?? ""}
+    />
   );
 }

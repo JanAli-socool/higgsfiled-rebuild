@@ -5,7 +5,7 @@ import { AppHeader } from "@/components/app-header";
 import { Composer } from "@/components/composer";
 import { FeedCard } from "@/components/feed-card";
 import { DetailPanel } from "@/components/detail-panel";
-import { animateDraft, emptyDraft, recreateDraft, referenceDraft, type Draft } from "@/components/draft";
+import { animateDraft, emptyDraft, recreateDraft, referenceDraft, takeStashedDraft, type Draft } from "@/components/draft";
 import { isActive, type Generation } from "@/lib/types";
 
 const POLL_MS = 2000;
@@ -37,6 +37,11 @@ export function Workspace({ isGuest }: { isGuest: boolean }) {
 
   useEffect(() => {
     refresh();
+    const handed = takeStashedDraft();
+    if (handed) {
+      setDraft(handed);
+      requestAnimationFrame(() => composerRef.current?.focus());
+    }
   }, [refresh]);
 
   // Poll only while something is in flight.
