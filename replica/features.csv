@@ -1,0 +1,47 @@
+feature,area,priority,original,clone,notes
+Sign in with magic link or Google,auth,must,yes,partial,original also has Apple/Microsoft/work email; two methods are enough | built; not yet verified in browser; guest sign-in verified (30 credits); email link verified; Google provider not configured
+Land in the workspace after sign-in (not marketing),auth,must,no,yes,fix: original drops new users on the landing page | verified via email link
+Starter credits on signup,credits,must,yes,yes,original gives 50 for work email only | 100 for accounts, 30 for guests (DB trigger) | verified: trigger grants 100 + ledger row
+One composer for image and video,composer,must,no,yes,fix: original has four different generate forms | verified
+3-4 curated models labelled best-for,composer,must,partial,partial,real images via Pollinations (rate-limited) and Cloudflare (pending creds); real video via HF Wan 2.2 Space verified in-app (5 s clip, ~2.5 min incl. queue; ~2 clips/day on a free token). 10 s video hidden when the provider caps at 5 s
+Aspect ratio and output count,composer,must,yes,yes, | verified x2
+Live cost next to remaining balance on Generate,composer,must,partial,yes,original shows cost but balance only on profile | verified (100 -> 98 left)
+Insufficient credits shown before Generate with inline top-up,credits,must,no,yes,fix: original paywalls after the prompt is written | verified as guest (needs 40 / has 29; Generate disabled); top-up links to the /pricing stub
+Async job pipeline queued/running/succeeded/failed,generation,must,yes,yes,polling sync; fal webhook route ready for deploy | verified on mock + blocking provider path
+Honest progress (elapsed vs typical time),generation,must,no,yes,fix: original shows only Generating | verified; typical time comes from the provider that runs the job
+Cancel in any state with refund,generation,must,partial,yes,original hides Cancel once running | verified: video cancelled, 20 refunded
+Automatic refund on failure,credits,must,yes,yes,inferred | includes timeouts and failed submits | verified: provider 402/500 -> refunded once
+Results feed per workspace,feed,must,yes,yes, | verified
+Detail panel with prompt and params,feed,must,yes,yes, | verified
+Recreate from a result,feed,must,yes,yes,verified: same prompt/settings, new take, linked to parent
+Use a result as reference,feed,must,yes,yes,verified in UI; the free image model ignores references and the composer says so
+Animate an image into video keeping prompt and lineage,feed,must,partial,yes,original drops the prompt and switches model silently | verified; lineage bug on repeat takes fixed
+Upload a reference image,composer,must,yes,yes,verified: signed upload straight to Storage, row + object match; paste-to-upload also wired
+Camera moves as # tokens in the prompt,composer,must,yes,yes,original does this in Cinema Studio; ~8 moves | 8 moves; picker + chips + server-side expansion | verified: token kept in UI, expanded for the model
+Style and motion presets as visible prompt fragments,composer,must,partial,no,original hides the prompt when a preset is chosen; ~10 presets
+Library of all generations,library,must,yes,no,
+Filter library by image or video,library,must,yes,no,
+Search library by prompt,library,must,yes,no,
+Real empty states,library,must,no,partial,fix: original video History shows onboarding when empty | built; not yet verified in browser; feed only so far
+Credit ledger,credits,must,yes,yes,inferred | verified: ledger sum == balance (78)
+Pricing page that explains credits as outcomes,pricing,must,partial,no,
+Buy a credit pack with Stripe test mode,pricing,must,yes,no,packs only; subscriptions cut
+Download a result,feed,must,yes,yes,verified: signed URL served as attachment
+Side-by-side compare of takes,feed,should,no,no,
+Version tree from parent generation,feed,should,no,no,
+Start and end frame for video,composer,should,yes,no,
+Public share link for one generation,sharing,should,yes,no,
+Delete to trash,library,should,yes,no,
+Favourite a result,library,could,yes,no,
+Subscriptions with monthly credits,pricing,skip,yes,skip,proration and renewals cost hours; packs prove the money loop
+~25 more models,composer,skip,yes,skip,model choice is the most confusing part of the original
+Camera body/lens/aperture rig,composer,skip,yes,skip,camera moves give most of the value
+Community feed profiles likes comments contests,community,skip,yes,skip,network effect and moderation; not the solo loop
+Elements / characters / AI Influencer,elements,skip,yes,skip,needs fine-tuning or reference pipelines
+Video edit suite (extend reframe upscale HDR FPS depth),editing,skip,yes,skip,each is its own integration
+Motion Control / Genjutsu / Katana / Effects,presets,skip,yes,skip,specialised pipelines
+Audio Playable Content Factory Ads Studio MCP API plugin,other,skip,yes,skip,separate products
+Projects and folders,library,skip,yes,skip,flat library plus search is enough
+Academy plan quiz promo banners,marketing,skip,yes,skip,marketing not product
+Enterprise SSO business plans,pricing,skip,yes,skip,no buyers
+Higgsfield own models (Soul DoP) and preset video library,models,skip,yes,skip,owned by Higgsfield; use public model APIs and our own thumbnails
