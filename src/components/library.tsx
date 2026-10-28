@@ -30,6 +30,8 @@ export function Library({ isGuest, initialKind, initialQuery }: { isGuest: boole
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [trashed, setTrashed] = useState<Generation | null>(null);
   const [attempt, setAttempt] = useState(0);
+  const [toastHeld, setToastHeld] = useState(false);
+  const pendingDelete = useRef<Promise<boolean>>(Promise.resolve(true));
   const request = useRef(0);
 
   const fetchPage = useCallback(
@@ -92,30 +94,37 @@ export function Library({ isGuest, initialKind, initialQuery }: { isGuest: boole
     router.push("/create");
   }
 
-  async function trash(g: Generation) {
+  // Optimistic: the take leaves the grid and Undo shows at once; Undo waits for the delete to land first.
+  function trash(g: Generation) {
     setSelectedId(null);
     setItems((list) => list?.filter((x) => x.id !== g.id) ?? null);
-    const res = await fetch(`/api/generations/${g.id}`, { method: "DELETE" });
-    if (!res.ok) {
-      setItems((list) => (list ? restoreInOrder(list, g) : list));
-      return;
-    }
     setTrashed(g);
+    pendingDelete.current = fetch(`/api/generations/${g.id}`, { method: "DELETE" })
+      .then((res) => res.ok)
+      .catch(() => false);
+    pendingDelete.current.then((ok) => {
+      if (ok) return;
+      setTrashed((t) => (t?.id === g.id ? null : t));
+      setItems((list) => (list ? restoreInOrder(list, g) : list));
+    });
   }
 
   async function undoTrash() {
     const g = trashed;
     if (!g) return;
     setTrashed(null);
-    const res = await fetch(`/api/generations/${g.id}`, { method: "POST", body: JSON.stringify({ restore: true }) });
-    if (res.ok) setItems((list) => (list ? restoreInOrder(list, g) : list));
+    setItems((list) => (list ? restoreInOrder(list, g) : list));
+    if (!(await pendingDelete.current)) return; // the delete never happened
+    const res = await fetch(`/api/generations/${g.id}`, { method: "POST", body: JSON.stringify({ restore: true }) }).catch(() => null);
+    if (!res?.ok) setItems((list) => list?.filter((x) => x.id !== g.id) ?? null);
   }
 
+  // The toast stays while the pointer or keyboard focus is on it.
   useEffect(() => {
-    if (!trashed) return;
+    if (!trashed || toastHeld) return;
     const t = setTimeout(() => setTrashed(null), 8000);
     return () => clearTimeout(t);
-  }, [trashed]);
+  }, [trashed, toastHeld]);
 
   const selected = items?.find((g) => g.id === selectedId) ?? null;
   const searching = query.trim().length > 0 || kind !== "all";
@@ -224,7 +233,13 @@ export function Library({ isGuest, initialKind, initialQuery }: { isGuest: boole
       </main>
 
       {trashed && (
-        <div role="status" className="fixed inset-x-0 bottom-4 z-40 mx-auto flex w-fit items-center gap-4 rounded-card border border-border bg-surface-2 px-4 py-2 text-sm shadow-xl">
+        <div
+          role="status"
+          onMouseEnter={() => setToastHeld(true)}
+          onMouseLeave={() => setToastHeld(false)}
+          onFocus={() => setToastHeld(true)}
+          onBlur={() => setToastHeld(false)}
+          className="fixed inset-x-0 bottom-4 z-40 mx-auto flex w-fit items-center gap-4 rounded-card border border-border bg-surface-2 px-4 py-2 text-sm shadow-xl">
           Moved to trash
           <button onClick={undoTrash} className="font-medium text-accent">
             Undo
