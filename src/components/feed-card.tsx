@@ -4,9 +4,10 @@ import { useEffect, useState } from "react";
 import type { Generation } from "@/lib/types";
 import { Media, aspectClass } from "@/components/media";
 
-type Props = { generation: Generation; onOpen: () => void; onCancel: () => void };
+// pending: the take is on its way to the server and has no row yet, so it can't be cancelled.
+type Props = { generation: Generation; onOpen: () => void; onCancel?: () => void; pending?: boolean };
 
-export function FeedCard({ generation: g, onOpen, onCancel }: Props) {
+export function FeedCard({ generation: g, onOpen, onCancel, pending = false }: Props) {
   const shape = `${aspectClass(g.aspect)} relative w-full overflow-hidden rounded-card border border-border bg-surface`;
 
   if (g.status === "succeeded") {
@@ -32,12 +33,14 @@ export function FeedCard({ generation: g, onOpen, onCancel }: Props) {
         <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" aria-hidden="true" />
         <div className="relative">
           <p className="mb-2 text-xs font-medium">{g.kind === "video" ? "Animating" : "Generating"}</p>
-          <Progress g={g} />
+          <Progress g={g} pending={pending} />
           <p className="mt-2 line-clamp-2 text-xs text-muted">{g.prompt}</p>
         </div>
-        <button onClick={onCancel} className="absolute right-2 top-2 rounded-md bg-black/50 px-2 py-1 text-xs backdrop-blur hover:bg-black/70">
-          Cancel
-        </button>
+        {onCancel && (
+          <button onClick={onCancel} className="absolute right-2 top-2 rounded-md bg-black/50 px-2 py-1 text-xs backdrop-blur hover:bg-black/70">
+            Cancel
+          </button>
+        )}
       </div>
     );
   }
@@ -58,7 +61,7 @@ export function FeedCard({ generation: g, onOpen, onCancel }: Props) {
 
 // Elapsed against the model's typical time. We never invent a percentage the provider didn't give us,
 // so past the typical time the bar holds and the label says so.
-function Progress({ g }: { g: Generation }) {
+function Progress({ g, pending }: { g: Generation; pending: boolean }) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 500);
@@ -70,8 +73,9 @@ function Progress({ g }: { g: Generation }) {
   const elapsed = Math.max(0, now - since);
   const pct = g.status === "queued" ? 4 : Math.min(92, (elapsed / typical) * 100);
   const secs = Math.round(elapsed / 1000);
-  const label =
-    g.status === "queued"
+  const label = pending
+    ? "Sending…"
+    : g.status === "queued"
       ? "Waiting for a free slot…"
       : elapsed > typical
         ? `${secs}s · taking longer than usual`

@@ -16,9 +16,12 @@ type Props = {
   balance: number | null;
   capabilities: Capabilities;
   onSubmitted: (balance?: number) => void;
+  // Fired on click, before the server answers, so the feed can show the take at once.
+  onSubmitStart?: (count: number) => void;
+  onSubmitFailed?: () => void;
 };
 
-export function Composer({ ref, draft, onChange, balance, capabilities, onSubmitted }: Props) {
+export function Composer({ ref, draft, onChange, balance, capabilities, onSubmitted, onSubmitStart, onSubmitFailed }: Props) {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<{ message: string; code?: string } | null>(null);
   const [cameraOpen, setCameraOpen] = useState(false);
@@ -79,6 +82,8 @@ export function Composer({ ref, draft, onChange, balance, capabilities, onSubmit
     if (blocked) return;
     setBusy(true);
     setError(null);
+    onSubmitStart?.(count);
+    let ok = false;
     try {
       const res = await fetch("/api/generations", {
         method: "POST",
@@ -95,10 +100,12 @@ export function Composer({ ref, draft, onChange, balance, capabilities, onSubmit
       });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) return setError({ message: data.error ?? "Something went wrong", code: data.code });
+      ok = true;
       onSubmitted(data.balance);
     } catch {
       setError({ message: "Couldn't reach the server. Check your connection and try again." });
     } finally {
+      if (!ok) onSubmitFailed?.();
       setBusy(false);
     }
   }

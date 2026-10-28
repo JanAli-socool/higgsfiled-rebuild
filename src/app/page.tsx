@@ -2,6 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getUser } from "@/lib/supabase/server";
 import { Logo } from "@/components/logo";
+import { StartFree } from "./start-free";
 
 const STEPS = [
   { title: "Draft stills for a credit each", body: "Try ideas fast. Add a look like 35mm film or Noir, and see the exact words it adds." },
@@ -38,9 +39,9 @@ export default async function Home() {
               it, and turn any frame into a shot.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
-              <Link href="/sign-in" className="rounded-card bg-accent px-5 py-3 font-medium text-accent-text transition-transform hover:-translate-y-0.5">
+              <StartFree className="rounded-card bg-accent px-5 py-3 font-medium text-accent-text transition-transform hover:-translate-y-0.5">
                 Start free, no account needed
-              </Link>
+              </StartFree>
               <span className="text-sm text-muted">30 credits to try. 100 with an account.</span>
             </div>
           </div>

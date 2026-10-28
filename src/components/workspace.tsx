@@ -11,6 +11,34 @@ import { isActive, type Generation } from "@/lib/types";
 
 const POLL_MS = 2000;
 
+// Stand-ins for the takes being sent, built from the draft so they look like the real cards.
+function placeholders(d: Draft, count: number): Generation[] {
+  const now = new Date().toISOString();
+  return Array.from({ length: count }, (_, i) => ({
+    id: `pending-${now}-${i}`,
+    batchId: "pending",
+    parentId: d.parentId,
+    kind: d.kind,
+    status: "queued",
+    modelId: d.modelId,
+    typicalSeconds: 0,
+    prompt: d.prompt,
+    aspect: d.aspect,
+    inputImagePath: d.input?.path ?? null,
+    inputImageUrl: d.input?.url ?? null,
+    outputPath: null,
+    outputUrl: null,
+    width: null,
+    height: null,
+    durationSeconds: null,
+    cost: 0,
+    error: null,
+    createdAt: now,
+    startedAt: null,
+    completedAt: null,
+  }));
+}
+
 const STARTERS = [
   "a lighthouse on a sea cliff at dusk, waves below, shot on 35mm film, natural grain, soft contrast",
   "a red fox curled up asleep in a snowy forest, warm golden hour light, long soft shadows",
@@ -26,6 +54,8 @@ export function Workspace({ isGuest }: { isGuest: boolean }) {
   const [loadError, setLoadError] = useState(false);
   const [draft, setDraft] = useState<Draft>(emptyDraft);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // Takes shown the moment Generate is pressed, until the server's real rows arrive.
+  const [pending, setPending] = useState<Generation[]>([]);
   const composerRef = useRef<HTMLTextAreaElement>(null);
 
   const refresh = useCallback(async () => {
@@ -86,7 +116,7 @@ export function Workspace({ isGuest }: { isGuest: boolean }) {
 
         {items === null && !loadError && <FeedSkeleton />}
 
-        {items?.length === 0 && (
+        {items?.length === 0 && !pending.length && (
           <div className="mx-auto mt-10 max-w-lg text-center sm:mt-16">
             <h1 className="text-2xl font-semibold tracking-tight">Your first take starts below</h1>
             <p className="mt-2 text-muted">
@@ -109,9 +139,14 @@ export function Workspace({ isGuest }: { isGuest: boolean }) {
           </div>
         )}
 
-        {!!items?.length && (
+        {!!(items?.length || pending.length) && (
           <ul className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-            {items.map((g) => (
+            {pending.map((g) => (
+              <li key={g.id}>
+                <FeedCard generation={g} pending onOpen={() => {}} />
+              </li>
+            ))}
+            {items?.map((g) => (
               <li key={g.id}>
                 <FeedCard generation={g} onOpen={() => setSelectedId(g.id)} onCancel={() => cancel(g.id)} />
               </li>
@@ -126,10 +161,12 @@ export function Workspace({ isGuest }: { isGuest: boolean }) {
         onChange={setDraft}
         balance={balance}
         capabilities={caps}
+        onSubmitStart={(count) => setPending(placeholders(draft, count))}
+        onSubmitFailed={() => setPending([])}
         onSubmitted={(newBalance) => {
           if (newBalance !== undefined) setBalance(newBalance);
           // The draft stays as it is (parent included) so the next take is one click away.
-          refresh();
+          refresh().then(() => setPending([]));
         }}
       />
 
