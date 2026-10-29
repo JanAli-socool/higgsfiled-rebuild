@@ -5,11 +5,12 @@ import { Logo } from "@/components/logo";
 export const metadata = { title: "Sign in · Reel" };
 
 // Asks Supabase which providers are switched on, so a button never leads to a "provider not enabled" error.
+// Asked on every visit: a cached answer kept the button hidden after Google was switched on.
 async function googleEnabled() {
   try {
     const res = await fetch(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/settings`, {
       headers: { apikey: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY! },
-      next: { revalidate: 60 },
+      cache: "no-store",
     });
     if (!res.ok) return false;
     const settings = (await res.json()) as { external?: { google?: boolean } };
