@@ -4,13 +4,16 @@
 
 It is not a clone. It keeps the one loop people pay Higgsfield for and fixes the parts that got in the way during recon.
 
+**Live: https://higgsfiled-rebuild.vercel.app** (Stripe in test mode; free model tiers, see [Honest constraints](#honest-constraints)).
+
 ## Try it in 60 seconds
 
-1. **Start free, no account needed**: you're in the workspace with 30 credits.
+1. **Start free, no account needed**: one click and you're in the workspace with 30 credits.
 2. Click a starter prompt (or write your own), add a **Style** like Noir, press **Generate** (1 credit).
 3. Open the result and press **Animate this image**. The prompt carries over; add a camera move like `#push-in` and generate.
-4. Watch the honest progress bar. Cancel any time and the credits come back.
-5. Find everything later in **Library** (filter, search as you type). Top up on **Credits** (Stripe test card `4242 4242 4242 4242`).
+4. Watch the honest progress bar over the frame being animated. Cancel any time and the credits come back.
+5. Open a finished clip and press **Extend** to continue it from its exact last frame; **Play full shot** plays the linked clips as one.
+6. Find everything later in **Library** (filter, search as you type). Top up on **Credits** (Stripe test card `4242 4242 4242 4242`).
 
 ## The product judgement story
 
@@ -28,6 +31,8 @@ Before any code I went through Higgsfield end to end and saved 42 screenshots an
 | 4 | **Camera moves as `#tokens`** and **style presets as visible words** | The cheapest way to give direction without a camera-rig UI. |
 | 5 | **Library** (filter, prefix search, trash with Undo) and **Pricing with Stripe Checkout** | Retention and the money loop, each verified end to end. |
 | 6 | **Design pass and phone width** | Last on purpose: polish on a loop that already works. |
+| 7 | **Extend** (longer shots from linked 5 s clips) and a generating backdrop | Asked for after using it: the free video model stops at 5 s and ~480p, so length comes from chaining clips frame-exactly, not from a bigger model. |
+| 8 | **Deploy and a live end-to-end test** | Guest, email and Google sign-in, drafts, library, a test-card purchase and the Stripe webhook, all on the live URL. The test found two UX issues, fixed the same day (below). |
 
 ### What I fixed compared with the original
 
@@ -42,6 +47,9 @@ Before any code I went through Higgsfield end to end and saved 42 screenshots an
 | Pricing explained in model names ("≈ 60 Nano Banana Pro generations") | **Packs explained as outcomes**: "about 150 drafts, or 7 five-second videos" |
 | Sign-up lands on the marketing page; empty tabs show onboarding | **Straight into the workspace**, real empty states with starter prompts |
 | Delete with no way back | **Trash with Undo** |
+| Clips are a fixed length | **Extend** a clip from its exact last frame and play the chain as one shot |
+
+Found in our own live test and fixed: the landing button led to a sign-in page that asked the same question again (now one click), and Generate showed nothing for ~8 s on a cold serverless start (the card now appears the instant you click).
 
 ### What I cut, and why
 
@@ -61,6 +69,7 @@ Higgsfield's own models, preset videos and community content can't be cloned at 
 
 - **Free models.** The paid model API (fal) had no balance, so Reel runs on free tiers behind one provider adapter (`src/lib/providers/`): images from Pollinations (about one per 45 s per IP) or Cloudflare Workers AI, video from a public Hugging Face ZeroGPU Space running **Wan 2.2 image-to-video** (real 5 s clips, ~1–2.5 min, about 2 clips a day on a free token). Research behind that choice: [`reports/Free video generation options.md`](reports/Free%20video%20generation%20options.md). Swapping to a paid provider is an env change.
 - **Video always starts from an image** (image-to-video only). It matches the loop and halves the model surface.
+- **Video quality and length.** The free Space renders ~480p at 16 fps and 5 s per clip, and the composer says so before you pay. A 30 s shot is six extended clips, which takes days on the free daily allowance; with a paid video provider the same Extend flow works unchanged.
 - **Guests can't buy credits**: anonymous credits would be lost with the browser session, so the page asks them to sign in with email first.
 
 ## What's in the box
@@ -71,7 +80,7 @@ Higgsfield's own models, preset videos and community content can't be cloned at 
 - **Credits**: a ledger (`credit_ledger`) with one charge and one refund per generation and one grant per Stripe session, enforced by unique indexes. The balance always equals the ledger sum.
 - **Payments**: credits are granted when the buyer returns from Checkout (the server re-reads the session from Stripe) and by a signature-checked webhook, whichever arrives first, exactly once.
 
-Plans and tracking: [`replica/architecture.md`](replica/architecture.md), [`replica/schema.sql`](replica/schema.sql), [`replica/features.csv`](replica/features.csv) (feature matrix: 26 of 28 must-haves done and verified), [`replica/build-log.md`](replica/build-log.md).
+Plans and tracking: [`replica/architecture.md`](replica/architecture.md), [`replica/schema.sql`](replica/schema.sql), [`replica/features.csv`](replica/features.csv) (feature matrix: 27 of 28 must-haves done and verified; the 28th, curated models, runs on free tiers), [`replica/build-log.md`](replica/build-log.md).
 
 ## Run it locally
 
@@ -94,6 +103,7 @@ Don't run `npm run build` while `npm run dev` is running: they share `.next`.
 
 1. Import the repo in Vercel and add the same environment variables, plus `PUBLIC_URL=https://<your-domain>`.
 2. In Supabase → Auth → URL configuration, set the Site URL to the Vercel domain and add `https://<your-domain>/auth/callback` to the redirect URLs.
-3. In Stripe (test mode) → Developers → Webhooks, add `https://<your-domain>/api/webhooks/stripe` for `checkout.session.completed` and `checkout.session.async_payment_succeeded`, then set its signing secret as `STRIPE_WEBHOOK_SECRET` and redeploy.
+3. In Stripe (test mode) → Developers → Webhooks, add `https://<your-domain>/api/webhooks/stripe` for `checkout.session.completed` and `checkout.session.async_payment_succeeded` (payload style **Snapshot**: Checkout events aren't offered as thin events), then set its signing secret as `STRIPE_WEBHOOK_SECRET` and redeploy.
+4. Google sign-in (optional): a Google OAuth web client with redirect URI `https://<project>.supabase.co/auth/v1/callback`, its ID and secret in Supabase → Auth → Providers → Google. The button appears on the next visit to sign-in.
 
 `/api/generations` uses `maxDuration = 300` so a free-tier video can finish in the background.

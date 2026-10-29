@@ -1,5 +1,5 @@
 feature,area,priority,original,clone,notes
-Sign in with magic link or Google,auth,must,yes,partial,original also has Apple/Microsoft/work email; two methods are enough | built; not yet verified in browser; guest sign-in verified (30 credits); email link verified; Google provider not configured | Google button now only shows once the provider is on in Supabase (no dead button); needs a Google OAuth client
+Sign in with magic link or Google,auth,must,yes,yes,"original also has Apple/Microsoft/work email; two methods are enough | verified live on Vercel 2026-10-29: guest (30 credits), email magic link, Google OAuth (links to an existing email account with the same address)"
 Land in the workspace after sign-in (not marketing),auth,must,no,yes,fix: original drops new users on the landing page | verified via email link
 Starter credits on signup,credits,must,yes,yes,original gives 50 for work email only | 100 for accounts, 30 for guests (DB trigger) | verified: trigger grants 100 + ledger row
 One composer for image and video,composer,must,no,yes,fix: original has four different generate forms | verified
