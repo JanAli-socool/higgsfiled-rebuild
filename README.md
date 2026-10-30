@@ -67,9 +67,9 @@ Higgsfield's own models, preset videos and community content can't be cloned at 
 
 ### Honest constraints
 
-- **Free models.** The paid model API (fal) had no balance, so Reel runs on free tiers behind one provider adapter (`src/lib/providers/`): images from Pollinations (about one per 45 s per IP) or Cloudflare Workers AI, video from a public Hugging Face ZeroGPU Space running **Wan 2.2 image-to-video** (real 5 s clips, ~1–2.5 min, about 2 clips a day on a free token). Research behind that choice: [`reports/Free video generation options.md`](reports/Free%20video%20generation%20options.md). Swapping to a paid provider is an env change.
+- **Free models.** The paid model API (fal) had no balance, so Reel runs on free tiers behind one provider adapter (`src/lib/providers/`): images from Pollinations (about one per 45 s per IP) or Cloudflare Workers AI, video from a public Hugging Face ZeroGPU Space running **Wan 2.2 image-to-video** (real 5 s clips, ~1–2.5 min, about 2 clips a day on a free token). Research behind that choice: [`reports/Free video generation options.md`](reports/Free%20video%20generation%20options.md). Swapping to a paid provider is an env change, and that was proven: **Google Veo 3.1** (Lite, through KIE) plugs into the same adapter with `VIDEO_PROVIDER=kie` and makes 8 s, 720p clips with sound in about 80 s, at about $0.15 a clip.
 - **Video always starts from an image** (image-to-video only). It matches the loop and halves the model surface.
-- **Video quality and length.** The free Space renders ~480p at 16 fps and 5 s per clip, and the composer says so before you pay. A 30 s shot is six extended clips, which takes days on the free daily allowance; with a paid video provider the same Extend flow works unchanged.
+- **Video quality and length.** The free Space renders ~480p at 16 fps and 5 s per clip (Veo 3.1: 720p, 8 s), and the composer says which before you pay. A 30 s shot is six extended clips, which takes days on the free daily allowance; with a paid video provider the same Extend flow works unchanged.
 - **Guests can't buy credits**: anonymous credits would be lost with the browser session, so the page asks them to sign in with email first.
 
 ## What's in the box
@@ -93,7 +93,7 @@ npm run dev                  # http://localhost:3000
 1. Create a Supabase project and run [`supabase/migrations/0001_init.sql`](supabase/migrations/0001_init.sql) in the SQL editor. In Auth → Providers, enable **Anonymous sign-ins** (and Google, optionally).
 2. Fill `.env.local` (names in [`.env.example`](.env.example)):
    - `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `SUPABASE_SERVICE_ROLE_KEY`
-   - Providers: `IMAGE_PROVIDER` (`pollinations` | `cloudflare` | `fal` | `mock`), `VIDEO_PROVIDER` (`huggingface` | `fal` | `mock`), plus `HF_TOKEN` (a free read token) for video
+   - Providers: `IMAGE_PROVIDER` (`pollinations` | `cloudflare` | `fal` | `mock`), `VIDEO_PROVIDER` (`huggingface` | `kie` | `fal` | `mock`), plus `HF_TOKEN` (a free read token) for the free video model, or `KIE_API_KEY` for Veo 3.1
    - `STRIPE_SECRET_KEY` (test mode). `STRIPE_WEBHOOK_SECRET` only once deployed.
 3. A prompt containing `fail-test` fails on purpose (mock provider), to see the refund path.
 

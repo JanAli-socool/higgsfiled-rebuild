@@ -307,7 +307,7 @@ export function Composer({ ref, draft, onChange, balance, capabilities, onSubmit
               .filter((m) => !capabilities.models || capabilities.models.includes(m.id))
               .map((m) => (
               <option key={m.id} value={m.id}>
-                {m.label}: {m.bestFor} · {m.cost} cr
+                {capabilities.labels?.[m.id] ?? m.label}: {m.bestFor} · {m.cost} cr
               </option>
             ))}
           </select>

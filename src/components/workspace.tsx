@@ -45,7 +45,7 @@ const STARTERS = [
   "a tiny ramen shop on a rainy street, neon-lit night, wet streets, cyan and magenta glow",
 ];
 
-export type Capabilities = { referenceImages: boolean; realVideo: boolean; videoNote: string | null; models: string[] | null };
+export type Capabilities = { referenceImages: boolean; realVideo: boolean; videoNote: string | null; models: string[] | null; labels?: Record<string, string> };
 
 export function Workspace({ isGuest }: { isGuest: boolean }) {
   const [items, setItems] = useState<Generation[] | null>(null);

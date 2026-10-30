@@ -217,6 +217,7 @@ export function capabilities() {
     realVideo: video.name !== "mock",
     videoNote: video.qualityNote ?? null,
     models: [...ids(image, "image"), ...ids(video, "video")],
+    labels: { ...image.modelLabels, ...video.modelLabels },
   };
 }
 
