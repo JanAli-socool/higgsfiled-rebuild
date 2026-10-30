@@ -5,8 +5,8 @@ import { Logo } from "@/components/logo";
 import { StartFree } from "./start-free";
 
 const STEPS = [
-  { title: "Draft stills for a credit each", body: "Try ideas fast. Add a look like 35mm film or Noir, and see the exact words it adds." },
-  { title: "Pick a frame and press Animate", body: "Your prompt carries over. Add camera moves like #push-in or #orbit, in the order you want them." },
+  { title: "Describe the shot", body: "Google Veo 3.1 turns a few words into a clip with sound. Add a start image only if you want to set the first frame." },
+  { title: "Direct the camera in words", body: "Add moves like #push-in or #orbit, in the order you want them. Extend a clip to keep the shot going." },
   { title: "Know the cost before you run", body: "Every take shows its price and what you'll have left. Failed or cancelled takes are refunded on their own." },
 ];
 
@@ -30,13 +30,13 @@ export default async function Home() {
         <section className="grid items-center gap-10 py-10 md:grid-cols-[1.1fr_1fr] md:py-20">
           <div>
             <h1 className="text-4xl font-semibold leading-[1.1] tracking-tight sm:text-6xl">
-              Make a still.
+              Describe a shot.
               <br />
-              <span className="text-accent">Then make it move.</span>
+              <span className="text-accent">Watch it move.</span>
             </h1>
             <p className="mt-5 max-w-lg text-lg text-muted">
-              One workspace for images and video. Direct the camera in a few words, see what every take costs before you run
-              it, and turn any frame into a shot.
+              Type what you want to see and get a video clip with sound in about a minute. Direct the camera in a few words,
+              and see what every take costs before you run it.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4">
               <StartFree className="rounded-card bg-accent px-5 py-3 font-medium text-accent-text transition-transform hover:-translate-y-0.5">
@@ -51,7 +51,7 @@ export default async function Home() {
               <div>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img src="/samples/lighthouse.jpg" alt="A still: a lighthouse on a sea cliff at dusk" className="aspect-[3/4] w-full rounded-card border border-border object-cover" />
-                <p className="mt-2 text-xs text-muted">1 · the still</p>
+                <p className="mt-2 text-xs text-muted">1 · start image (optional)</p>
               </div>
               <div>
                 <video
