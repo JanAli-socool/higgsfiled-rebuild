@@ -4,16 +4,15 @@
 
 It is not a clone. It keeps the one loop people pay Higgsfield for and fixes the parts that got in the way during recon.
 
-**Live: https://higgsfiled-rebuild.vercel.app** (Stripe in test mode; free model tiers, see [Honest constraints](#honest-constraints)).
+**Live: https://higgsfiled-rebuild.vercel.app** (Stripe in test mode). Video on the live site runs on **Google Veo 3.1**: describe a shot and get an 8 s, 720p clip with sound in about a minute. See [Honest constraints](#honest-constraints) for how the free setup differs.
 
 ## Try it in 60 seconds
 
 1. **Start free, no account needed**: one click and you're in the workspace with 30 credits.
-2. Click a starter prompt (or write your own), add a **Style** like Noir, press **Generate** (1 credit).
-3. Open the result and press **Animate this image**. The prompt carries over; add a camera move like `#push-in` and generate.
-4. Watch the honest progress bar over the frame being animated. Cancel any time and the credits come back.
-5. Open a finished clip and press **Extend** to continue it from its exact last frame; **Play full shot** plays the linked clips as one.
-6. Find everything later in **Library** (filter, search as you type). Top up on **Credits** (Stripe test card `4242 4242 4242 4242`).
+2. Click a starter prompt (or write your own), add a camera move like `#push-in`, pick **16:9** or **9:16** and press **Generate** (20 credits). Veo 3.1 makes the clip from the prompt alone; **Add start image** if you want to set the first frame yourself.
+3. Watch the honest progress bar: real elapsed time against the typical time. Cancel any time and the credits come back.
+4. Open a finished clip and press **Extend this shot** to continue it from its exact last frame; **Play full shot** plays the linked clips as one.
+5. Find everything later in **Library** (filter, search as you type). Top up on **Credits** (Stripe test card `4242 4242 4242 4242`).
 
 ## The product judgement story
 
@@ -33,6 +32,7 @@ Before any code I went through Higgsfield end to end and saved 42 screenshots an
 | 6 | **Design pass and phone width** | Last on purpose: polish on a loop that already works. |
 | 7 | **Extend** (longer shots from linked 5 s clips) and a generating backdrop | Asked for after using it: the free video model stops at 5 s and ~480p, so length comes from chaining clips frame-exactly, not from a bigger model. |
 | 8 | **Deploy and a live end-to-end test** | Guest, email and Google sign-in, drafts, library, a test-card purchase and the Stripe webhook, all on the live URL. The test found two UX issues, fixed the same day (below). |
+| 9 | **Google Veo 3.1 behind the same adapter**, and a video-only composer with text-to-video | Once a paid key was available, the free model's ~480p and 2 clips a day were the weakest part of the product. One new provider file swapped it for 8 s, 720p clips with sound, and proved the adapter was the right call. |
 
 ### What I fixed compared with the original
 
@@ -65,11 +65,13 @@ Found in our own live test and fixed: the landing button led to a sign-in page t
 
 Higgsfield's own models, preset videos and community content can't be cloned at all; Reel uses public models and its own outputs (the landing-page clip was made in Reel).
 
+With Veo 3.1 switched on, the composer is video-only: the Image tab goes away because Veo no longer needs a still to start from. Switch video back to the free model (`VIDEO_PROVIDER=huggingface`) and the original loop returns: draft a still for 1 credit, open it, press **Animate**.
+
 ### Honest constraints
 
 - **Free models.** The paid model API (fal) had no balance, so Reel runs on free tiers behind one provider adapter (`src/lib/providers/`): images from Pollinations (about one per 45 s per IP) or Cloudflare Workers AI, video from a public Hugging Face ZeroGPU Space running **Wan 2.2 image-to-video** (real 5 s clips, ~1–2.5 min, about 2 clips a day on a free token). Research behind that choice: [`reports/Free video generation options.md`](reports/Free%20video%20generation%20options.md). Swapping to a paid provider is an env change, and that was proven: **Google Veo 3.1** (Lite, through KIE) plugs into the same adapter with `VIDEO_PROVIDER=kie` and makes 8 s clips with sound in about 80 s (verified at 720p for about $0.15 a clip; 1080p is the default and costs about $0.18).
-- **Video always starts from an image** (image-to-video only). It matches the loop and halves the model surface.
-- **Video quality and length.** The free Space renders ~480p at 16 fps and 5 s per clip (Veo 3.1: 1080p, 8 s), and the composer says which before you pay. A 30 s shot is six extended clips, which takes days on the free daily allowance; with a paid video provider the same Extend flow works unchanged.
+- **Start images.** The free video model only animates images, so the free setup keeps the still → animate loop. Veo 3.1 also works from the prompt alone, so with it on, video starts from text and a start image is optional.
+- **Video quality and length.** The free Space renders ~480p at 16 fps and 5 s per clip (Veo 3.1 on the live site: 720p, 8 s, with sound), and the composer says which before you pay. A 30 s shot is six extended clips, which takes days on the free daily allowance; with a paid video provider the same Extend flow works unchanged.
 - **Guests can't buy credits**: anonymous credits would be lost with the browser session, so the page asks them to sign in with email first.
 
 ## What's in the box
