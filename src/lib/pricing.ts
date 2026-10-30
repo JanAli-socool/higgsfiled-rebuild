@@ -17,7 +17,7 @@ export function outcomes(credits: number) {
   return [
     { label: "fast drafts", count: Math.floor(credits / each("img-fast")) },
     { label: "high-quality images", count: Math.floor(credits / each("img-quality")) },
-    { label: "5-second videos", count: Math.floor(credits / each("vid-5s")) },
+    { label: "video clips", count: Math.floor(credits / each("vid-5s")) },
   ];
 }
 

@@ -141,7 +141,7 @@ export function DetailPanel({ generation: g, parent, onClose, onSelect, onRecrea
           {canExtend(g) && onExtend && (
             <>
               <button onClick={extend} disabled={extending} className="rounded-card bg-accent px-4 py-2.5 font-medium text-accent-text disabled:opacity-60" title="Continue from this clip's last frame">
-                {extending ? "Preparing the last frame…" : `Extend +5 s · ${shotSeconds + 5} s shot`}
+                {extending ? "Preparing the last frame…" : "Extend this shot"}
               </button>
               {extendError && (
                 <p role="alert" className="text-sm text-danger">

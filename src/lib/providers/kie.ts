@@ -11,6 +11,7 @@ import { ProviderJobFailed, type ModelProvider } from "./types";
 const API = "https://api.kie.ai/api/v1/jobs";
 const TIER = process.env.KIE_VEO_MODEL || "veo3_lite";
 const RESOLUTION = process.env.KIE_VEO_RESOLUTION || "1080p";
+// Veo offers 4, 6 or 8 s at the same price per clip, so Reel always asks for the longest.
 const CLIP_SECONDS = 8;
 
 // Veo renders 16:9 or 9:16 only; square frames are centre-cropped by "Auto".
@@ -37,9 +38,9 @@ export const kieProvider: ModelProvider = {
   name: "kie",
   supportsReference: false,
   supportedModels: ["vid-5s"],
-  modelLabels: { "vid-5s": `Veo 3.1 · ${CLIP_SECONDS} s` },
+  modelLabels: { "vid-5s": "Veo 3.1" },
   typicalSeconds: () => 90,
-  qualityNote: `Google Veo 3.1: ${CLIP_SECONDS} s clips at ${RESOLUTION} with sound. Use Extend on a finished clip for longer shots.`,
+  qualityNote: `Google Veo 3.1 at ${RESOLUTION} with sound. Reel picks the clip length; use Extend on a finished clip to keep the shot going.`,
 
   async submit(input) {
     if (input.kind !== "video") throw new Error("This provider only animates images");
