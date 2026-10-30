@@ -37,7 +37,7 @@ export const kieProvider: ModelProvider = {
   name: "kie",
   supportsReference: false,
   supportedModels: ["vid-5s"],
-  modelLabels: { "vid-5s": `Animate · ${CLIP_SECONDS} s` },
+  modelLabels: { "vid-5s": `Veo 3.1 · ${CLIP_SECONDS} s` },
   typicalSeconds: () => 90,
   qualityNote: `Google Veo 3.1: ${CLIP_SECONDS} s clips at ${RESOLUTION} with sound. Use Extend on a finished clip for longer shots.`,
 
