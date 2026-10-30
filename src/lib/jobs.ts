@@ -57,7 +57,7 @@ export async function createGenerations(userId: string, req: CreateRequest) {
   const db = createAdminClient();
   const model = getModel(req.modelId);
   if (!model || model.kind !== req.kind) throw new JobError("Unknown model", 400, "bad_model");
-  if (req.kind === "video" && !req.inputImagePath) throw new JobError("Pick a start image to animate", 400, "needs_image");
+  if (req.kind === "video" && !req.inputImagePath && !providerFor("video").textToVideo) throw new JobError("Pick a start image to animate", 400, "needs_image");
   if (req.inputImagePath && ownerOf(req.inputImagePath) !== userId) throw new JobError("That image isn't yours", 403, "bad_image");
   const count = req.kind === "video" ? 1 : req.count;
   const provider = providerFor(req.kind);
@@ -215,6 +215,7 @@ export function capabilities() {
   return {
     referenceImages: image.supportsReference,
     realVideo: video.name !== "mock",
+    textToVideo: video.textToVideo === true,
     videoNote: video.qualityNote ?? null,
     models: [...ids(image, "image"), ...ids(video, "video")],
     labels: { ...image.modelLabels, ...video.modelLabels },

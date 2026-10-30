@@ -31,6 +31,7 @@ export interface ModelProvider {
   // set this, and the job is completed by a background task right after submit.
   blocking?: boolean;
   supportsReference: boolean;
+  textToVideo?: boolean; // video can start from the prompt alone, without a start image
   supportedModels?: string[]; // model ids this provider can serve; all of its kind if omitted
   modelLabels?: Record<string, string>; // overrides a model's label where this provider differs (e.g. clip length)
   typicalSeconds?(modelId: string): number | undefined; // overrides the model's default

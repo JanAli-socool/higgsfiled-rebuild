@@ -2,7 +2,7 @@ import "server-only";
 import type { Aspect } from "@/lib/models";
 import { ProviderJobFailed, type ModelProvider } from "./types";
 
-// Image-to-video with Google Veo 3.1 through KIE (paid credits, KIE_API_KEY).
+// Text-to-video and image-to-video with Google Veo 3.1 through KIE (paid credits, KIE_API_KEY).
 // The top-level model is always "veo-3-1"; the tier goes in input.model:
 // veo3_lite, veo3_fast or veo3 (Quality), each at 720p or 1080p. KIE credits per clip:
 // Lite 30 / 35, Fast 60 / 65, Quality 250 / 255. Lite at 1080p is the default: the sharpest
@@ -26,7 +26,11 @@ async function call<T>(path: string, init?: RequestInit): Promise<T> {
     cache: "no-store",
   });
   const body = (await res.json().catch(() => null)) as { code?: number; msg?: string; data?: T } | null;
-  if (!res.ok || body?.code !== 200 || !body.data) throw new Error(body?.msg || `KIE request failed (${res.status})`);
+  if (!res.ok || body?.code !== 200 || !body.data) {
+    // KIE's own "top up" message reads as if the user were out of credits; it's our account.
+    if (/insufficient|balance|top up/i.test(body?.msg ?? "")) throw new Error("the video service is out of capacity right now. Try again later");
+    throw new Error(body?.msg || `KIE request failed (${res.status})`);
+  }
   return body.data;
 }
 
@@ -37,14 +41,18 @@ async function task(requestId: string) {
 export const kieProvider: ModelProvider = {
   name: "kie",
   supportsReference: false,
+  textToVideo: true,
   supportedModels: ["vid-5s"],
   modelLabels: { "vid-5s": "Veo 3.1" },
   typicalSeconds: () => 90,
-  qualityNote: `Google Veo 3.1 at ${RESOLUTION} with sound. Reel picks the clip length; use Extend on a finished clip to keep the shot going.`,
+  qualityNote: `Google Veo 3.1 at ${RESOLUTION} with sound. Add a start image to set the first frame, or let the prompt do it all. Reel picks the clip length; Extend keeps a shot going.`,
 
   async submit(input) {
-    if (input.kind !== "video") throw new Error("This provider only animates images");
-    if (!input.inputImageUrl) throw new Error("A start image is required");
+    if (input.kind !== "video") throw new Error("This provider only makes video");
+    // With a start image Veo animates it; without one it makes the clip from the prompt alone.
+    const start = input.inputImageUrl
+      ? { image_urls: [input.inputImageUrl], generation_type: "FIRST_AND_LAST_FRAMES_2_VIDEO", aspect_ratio: ASPECT[input.aspect] }
+      : { generation_type: "TEXT_2_VIDEO", aspect_ratio: ASPECT[input.aspect] === "9:16" ? "9:16" : "16:9" };
     const data = await call<{ taskId: string }>("/createTask", {
       method: "POST",
       body: JSON.stringify({
@@ -52,9 +60,7 @@ export const kieProvider: ModelProvider = {
         input: {
           model: TIER,
           prompt: input.prompt,
-          image_urls: [input.inputImageUrl],
-          generation_type: "FIRST_AND_LAST_FRAMES_2_VIDEO",
-          aspect_ratio: ASPECT[input.aspect],
+          ...start,
           resolution: RESOLUTION,
           duration: CLIP_SECONDS,
         },

@@ -6,7 +6,7 @@ import { Composer } from "@/components/composer";
 import { FeedCard } from "@/components/feed-card";
 import { DetailPanel } from "@/components/detail-panel";
 import { extendDraft, shotOf } from "@/components/extend";
-import { animateDraft, emptyDraft, recreateDraft, referenceDraft, takeStashedDraft, type Draft } from "@/components/draft";
+import { animateDraft, asVideo, emptyDraft, recreateDraft, referenceDraft, takeStashedDraft, type Draft } from "@/components/draft";
 import { isActive, type Generation } from "@/lib/types";
 
 const POLL_MS = 2000;
@@ -45,7 +45,7 @@ const STARTERS = [
   "a tiny ramen shop on a rainy street, neon-lit night, wet streets, cyan and magenta glow",
 ];
 
-export type Capabilities = { referenceImages: boolean; realVideo: boolean; videoNote: string | null; models: string[] | null; labels?: Record<string, string> };
+export type Capabilities = { referenceImages: boolean; realVideo: boolean; videoNote: string | null; models: string[] | null; labels?: Record<string, string>; textToVideo?: boolean };
 
 export function Workspace({ isGuest }: { isGuest: boolean }) {
   const [items, setItems] = useState<Generation[] | null>(null);
@@ -57,6 +57,7 @@ export function Workspace({ isGuest }: { isGuest: boolean }) {
   // Takes shown the moment Generate is pressed, until the server's real rows arrive.
   const [pending, setPending] = useState<Generation[]>([]);
   const composerRef = useRef<HTMLTextAreaElement>(null);
+  const shown = caps.textToVideo ? asVideo(draft) : draft;
 
   const refresh = useCallback(async () => {
     try {
@@ -119,10 +120,17 @@ export function Workspace({ isGuest }: { isGuest: boolean }) {
         {items?.length === 0 && !pending.length && (
           <div className="mx-auto mt-10 max-w-lg text-center sm:mt-16">
             <h1 className="text-2xl font-semibold tracking-tight">Your first take starts below</h1>
-            <p className="mt-2 text-muted">
-              Describe a scene and press Generate. Fast drafts cost 1 credit, so try a few. When you like a frame, open it
-              and press Animate to turn it into a shot.
-            </p>
+            {caps.textToVideo ? (
+              <p className="mt-2 text-muted">
+                Describe a shot and press Generate. Veo 3.1 turns it into a video clip with sound. Add a start image if you
+                want to set the first frame yourself.
+              </p>
+            ) : (
+              <p className="mt-2 text-muted">
+                Describe a scene and press Generate. Fast drafts cost 1 credit, so try a few. When you like a frame, open it
+                and press Animate to turn it into a shot.
+              </p>
+            )}
             <p className="mt-6 text-xs text-muted">Or start from one of these</p>
             <ul className="mt-2 flex flex-col gap-2">
               {STARTERS.map((s) => (
@@ -157,11 +165,11 @@ export function Workspace({ isGuest }: { isGuest: boolean }) {
 
       <Composer
         ref={composerRef}
-        draft={draft}
+        draft={shown}
         onChange={setDraft}
         balance={balance}
         capabilities={caps}
-        onSubmitStart={(count) => setPending(placeholders(draft, count))}
+        onSubmitStart={(count) => setPending(placeholders(shown, count))}
         onSubmitFailed={() => setPending([])}
         onSubmitted={(newBalance) => {
           if (newBalance !== undefined) setBalance(newBalance);

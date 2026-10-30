@@ -71,3 +71,12 @@ export function takeStashedDraft(): Draft | null {
     return null;
   }
 }
+
+// When the video model can start from a prompt alone, the composer only makes video:
+// any draft becomes a video draft, an attached image becomes its start frame, and
+// without one the frame is 16:9 or 9:16, the two shapes the model renders.
+export function asVideo(d: Draft): Draft {
+  const aspect: Aspect = d.input ? d.aspect : d.aspect === "9:16" || d.aspect === "3:4" ? "9:16" : "16:9";
+  if (d.kind === "video" && aspect === d.aspect) return d;
+  return { ...d, kind: "video", modelId: DEFAULT_MODEL.video, count: 1, aspect };
+}

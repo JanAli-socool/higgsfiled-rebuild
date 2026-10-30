@@ -33,7 +33,9 @@ export function Composer({ ref, draft, onChange, balance, capabilities, onSubmit
   const count = draft.kind === "video" ? 1 : draft.count;
   const cost = model.cost * count;
   const short = balance !== null && cost > balance;
-  const needsImage = draft.kind === "video" && !draft.input;
+  const videoOnly = capabilities.textToVideo === true; // the video model can start from the prompt alone
+  const capsLoaded = capabilities.models !== null; // until then we don't know whether to show the Image tab
+  const needsImage = draft.kind === "video" && !draft.input && !videoOnly;
   const moves = findMoves(draft.prompt);
   const look = activePreset(draft.prompt, draft.kind);
   const blocked = busy || !draft.prompt.trim() || needsImage || short;
@@ -117,19 +119,21 @@ export function Composer({ ref, draft, onChange, balance, capabilities, onSubmit
     >
       <div className="flex flex-col gap-2">
         <div className="flex items-center gap-2">
-          <div role="radiogroup" aria-label="What to make" className="flex rounded-lg border border-border bg-surface p-0.5 text-sm">
-            {(["image", "video"] as Kind[]).map((k) => (
-              <button
-                key={k}
-                role="radio"
-                aria-checked={draft.kind === k}
-                onClick={() => setKind(k)}
-                className="rounded-md px-3 py-1 capitalize text-muted aria-checked:bg-surface-2 aria-checked:text-text"
-              >
-                {k}
-              </button>
-            ))}
-          </div>
+          {capsLoaded && !videoOnly && (
+            <div role="radiogroup" aria-label="What to make" className="flex rounded-lg border border-border bg-surface p-0.5 text-sm">
+              {(["image", "video"] as Kind[]).map((k) => (
+                <button
+                  key={k}
+                  role="radio"
+                  aria-checked={draft.kind === k}
+                  onClick={() => setKind(k)}
+                  className="rounded-md px-3 py-1 capitalize text-muted aria-checked:bg-surface-2 aria-checked:text-text"
+                >
+                  {k}
+                </button>
+              ))}
+            </div>
+          )}
 
           {draft.input && (
             <div className="flex items-center gap-2 rounded-lg border border-border bg-surface py-0.5 pl-0.5 pr-2 text-xs">
@@ -150,7 +154,7 @@ export function Composer({ ref, draft, onChange, balance, capabilities, onSubmit
               disabled={uploading}
               className="rounded-lg border border-border bg-surface px-3 py-1 text-sm text-muted hover:text-text disabled:opacity-60"
             >
-              {uploading ? "Uploading…" : draft.kind === "video" ? "Upload start image" : "Add reference image"}
+              {uploading ? "Uploading…" : videoOnly ? "Add start image (optional)" : draft.kind === "video" ? "Upload start image" : "Add reference image"}
             </button>
           )}
           <input
@@ -208,7 +212,9 @@ export function Composer({ ref, draft, onChange, balance, capabilities, onSubmit
               }
             }}
             placeholder={
-              draft.kind === "video"
+              videoOnly && !draft.input
+                ? "Describe the shot, e.g. waves crash against a lighthouse at dusk as the lamp flickers on #push-in"
+                : draft.kind === "video"
                 ? "Describe the motion, e.g. waves crash below as the light fades #push-in"
                 : "Describe a scene, e.g. a lighthouse on a cliff at dusk, 35mm film"
             }
@@ -307,10 +313,27 @@ export function Composer({ ref, draft, onChange, balance, capabilities, onSubmit
               .filter((m) => !capabilities.models || capabilities.models.includes(m.id))
               .map((m) => (
               <option key={m.id} value={m.id}>
-                {capabilities.labels?.[m.id] ?? m.label}: {m.bestFor} · {m.cost} cr
+                {videoOnly ? `${capabilities.labels?.[m.id] ?? m.label} · ${m.cost} cr` : `${capabilities.labels?.[m.id] ?? m.label}: ${m.bestFor} · ${m.cost} cr`}
               </option>
             ))}
           </select>
+
+          {videoOnly && !draft.input && (
+            <>
+              <label className="sr-only" htmlFor="aspect">
+                Aspect ratio
+              </label>
+              <select
+                id="aspect"
+                value={draft.aspect}
+                onChange={(e) => set({ aspect: e.target.value as Aspect })}
+                className="rounded-lg border border-border bg-surface px-2 py-2 text-sm"
+              >
+                <option value="16:9">16:9 landscape</option>
+                <option value="9:16">9:16 portrait</option>
+              </select>
+            </>
+          )}
 
           {draft.kind === "image" && (
             <>
